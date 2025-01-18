@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
 
-import br.ufrn.bti.banco1000.enums.TipoContaEnum;
+import br.ufrn.bti.banco1000.model.Agencia;
 import br.ufrn.bti.banco1000.model.Conta;
+import br.ufrn.bti.banco1000.model.ContaCorrente;
+import br.ufrn.bti.banco1000.model.ContaPoupanca;
+import br.ufrn.bti.banco1000.model.ContaSalario;
 import br.ufrn.bti.banco1000.model.Usuario;
 
 public final class Menu {
@@ -13,22 +16,35 @@ public final class Menu {
   private static Usuario usuarioAtual;
   private static Conta contaAtual;
   private static ArrayList<Usuario> usuarios = new ArrayList<>();
+  private static ArrayList<Agencia> agencias = new ArrayList<>();
 
   private Menu() {
   }
 
   public static void iniciarPrograma() {
+    Agencia agencia1 = new Agencia(001, "Agência 1");
+    Agencia agencia2 = new Agencia(002, "Agência 2");
+
+    agencias.add(agencia1);
+    agencias.add(agencia2);
+
     Usuario usuario1 = new Usuario("João", "12345678900", "1234");
-    Conta contaCorrente1 = new Conta(usuario1.getCpf(), 10, TipoContaEnum.CORRENTE);
-    Conta contaPoupanca1 = new Conta(usuario1.getCpf(), 500, TipoContaEnum.POUPANCA);
+    Conta contaCorrente1 = new ContaCorrente(usuario1.getCpf(), 500, agencia1);
+    Conta contaPoupanca1 = new ContaPoupanca(usuario1.getCpf(), 10, agencia1);
+    Conta contaSalario1 = new ContaSalario(usuario1.getCpf(), 1500, agencia1);
+
     usuario1.adicionarConta(contaCorrente1);
     usuario1.adicionarConta(contaPoupanca1);
+    usuario1.adicionarConta(contaSalario1);
 
     Usuario usuario2 = new Usuario("Maria", "98765432100", "1234");
-    Conta contaCorrente2 = new Conta(usuario2.getCpf(), 10, TipoContaEnum.CORRENTE);
-    Conta contaPoupanca2 = new Conta(usuario2.getCpf(), 500, TipoContaEnum.POUPANCA);
+    Conta contaCorrente2 = new ContaCorrente(usuario2.getCpf(), 500, agencia2);
+    Conta contaPoupanca2 = new ContaPoupanca(usuario2.getCpf(), 10, agencia2);
+    Conta contaSalario2 = new ContaSalario(usuario2.getCpf(), 1500, agencia2);
+
     usuario2.adicionarConta(contaCorrente2);
     usuario2.adicionarConta(contaPoupanca2);
+    usuario2.adicionarConta(contaSalario2);
 
     usuarios.add(usuario1);
     usuarios.add(usuario2);
@@ -161,12 +177,13 @@ public final class Menu {
   }
 
   private static void mostrarMenuUsuarioLogado() {
-    System.out.println("Seja bem-vindo, " + usuarioAtual.getNome() + "!");
+    System.out.println("Seja bem-vindo(a), " + usuarioAtual.getNome() + "!");
     System.out.println("MENU COM LOGIN");
     System.out.println("0 - DESLOGAR");
     System.out.println("1 - CRIAR CONTA");
     System.out.println("2 - LISTAR MINHAS CONTAS");
     System.out.println("3 - SELECIONAR CONTA");
+    System.out.println("4 - LISTAR AGÊNCIAS");
 
     boolean opcaoInvalida = true;
     while (opcaoInvalida) {
@@ -201,6 +218,11 @@ public final class Menu {
           selecionarConta();
           break;
         }
+        case 4 -> {
+          opcaoInvalida = false;
+          listarAgencias();
+          break;
+        }
         default -> System.out.println("Opção inválida! Por favor, escolha 0, 1 , 2 ou 3.");
       }
     }
@@ -208,25 +230,35 @@ public final class Menu {
 
   private static void criarConta() {
     System.out.println("\nCRIAR CONTA");
+    Agencia agenciaSelecionada;
 
     try {
+      System.out.println("Escolha um índice das agências abaixo:");
+      listarAgencias();
+
+      System.out.print("Índice selecionado: ");
+      int indiceSelecionado = Integer.parseInt(scanner.nextLine());
+      agenciaSelecionada = agencias.get(indiceSelecionado - 1);
+
       System.out.print("Digite o saldo inicial: ");
       double saldo = Double.parseDouble(scanner.nextLine());
 
-      System.out.print("Digite o tipo da conta (1 - Corrente, 2 - Poupança): ");
+      System.out.print("Digite o tipo da conta (1 - Corrente, 2 - Poupança, 3 - Salário): ");
       int tipo = Integer.parseInt(scanner.nextLine());
 
-      TipoContaEnum tipoConta;
+      Conta contaNova;
       if (tipo == 1) {
-        tipoConta = TipoContaEnum.CORRENTE;
+        contaNova = new ContaCorrente(usuarioAtual.getCpf(), saldo, agenciaSelecionada);
       } else if (tipo == 2) {
-        tipoConta = TipoContaEnum.POUPANCA;
+        contaNova = new ContaPoupanca(usuarioAtual.getCpf(), saldo, agenciaSelecionada);
+      } else if (tipo == 3) {
+        contaNova = new ContaSalario(usuarioAtual.getCpf(), saldo, agenciaSelecionada);
       } else {
         System.out.println("Tipo de conta inválido.\n");
         return;
       }
 
-      usuarioAtual.adicionarConta(new Conta(usuarioAtual.getCpf(), saldo, tipoConta));
+      usuarioAtual.adicionarConta(contaNova);
       System.out.println("Conta criada com sucesso!\n");
     } catch (Exception e) {
       System.err.println("Erro em alguma operação. Tente novamente\n");
@@ -246,7 +278,7 @@ public final class Menu {
       Conta conta = usuarioAtual.getContas().get(i);
       if (!(contaId.isPresent() && conta.getId().equals(contaId.get()))) {
         System.out.println(
-            (i + 1) + " - " + conta.getId() + " - R$" + conta.getSaldo() + " - " + conta.getTipoConta());
+            (i + 1) + " - " + conta.getId() + " - R$" + conta.getSaldo() + " - " + conta.getTipoDeConta());
       }
 
     }
@@ -273,14 +305,36 @@ public final class Menu {
     }
   }
 
+  private static void listarAgencias() {
+    System.out.println("\nLISTAR AGÊNCIAS");
+    if (agencias.isEmpty()) {
+      System.out.println("Nenhuma agência encontrada.\n");
+      return;
+    }
+
+    System.out.println("ÍNDICE - ID - NOME");
+    for (int i = 0; i < agencias.size(); i++) {
+      Agencia agencia = agencias.get(i);
+      System.out.println((i + 1) + " - " + agencia.getId() + " - " + agencia.getNome());
+    }
+    System.err.println("");
+  }
+
   private static void mostrarMenuContaSelecionada() {
-    System.out.println("Conta selecionada: " + contaAtual.getId() + " - Tipo: " + contaAtual.getTipoConta());
+    System.out.println("Conta selecionada: " + contaAtual.getId() + " - Tipo: " + contaAtual.getTipoDeConta());
     System.out.println("MENU CONTA SELECIONADA");
     System.out.println("0 - DESSELECIONAR CONTA");
     System.out.println("1 - CONSULTAR SALDO");
     System.out.println("2 - DEPOSITAR");
     System.out.println("3 - REALIZAR SAQUE");
     System.out.println("4 - TRANSFERIR");
+    if (contaAtual instanceof ContaCorrente) {
+      System.out.println("5 - APLICAR TAXA DE MANUTENÇÃO");
+    } else if (contaAtual instanceof ContaPoupanca) {
+      System.out.println("5 - APLICAR RENDIMENTO MENSAL");
+    } else if (contaAtual instanceof ContaSalario) {
+      System.out.println("5 - CHECAR SAQUES RESTANTES");
+    }
 
     boolean opcaoInvalida = true;
     while (opcaoInvalida) {
@@ -321,7 +375,21 @@ public final class Menu {
           realizarTransferenciaNaConta();
           break;
         }
-        default -> System.out.println("Opção inválida! Por favor, escolha 0, 1, 2, 3 ou 4.");
+        case 5 -> {
+          if (contaAtual instanceof ContaCorrente) {
+            opcaoInvalida = false;
+            ((ContaCorrente) contaAtual).aplicarTaxaManutencao();
+          } else if (contaAtual instanceof ContaPoupanca) {
+            opcaoInvalida = false;
+            ((ContaPoupanca) contaAtual).aplicarRendimento();
+          } else if (contaAtual instanceof ContaSalario) {
+            opcaoInvalida = false;
+            int saquesRestantes = ((ContaSalario) contaAtual).getSaquesRestantes();
+            System.out.println("Você possui " + saquesRestantes + " saques restantes.\n");
+          }
+          break;
+        }
+        default -> System.out.println("Opção inválida! Por favor, escolha 0, 1, 2, 3, 4 ou 5.");
       }
     }
   }
@@ -333,6 +401,7 @@ public final class Menu {
       contaAtual.depositar(valor);
       System.out.println("Depósito realizado com sucesso!\n");
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       System.out.println("Erro na operação. Tente novamente.\n");
     }
   }

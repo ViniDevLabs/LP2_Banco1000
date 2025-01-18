@@ -1,22 +1,23 @@
 package br.ufrn.bti.banco1000.model;
 
-import java.util.UUID;
-
-import br.ufrn.bti.banco1000.enums.TipoContaEnum;
 import lombok.Data;
 
 @Data
 public class Conta {
+    private static long contador = 1;
     private String id;
     private String usuarioCpf;
     private double saldo;
-    private TipoContaEnum tipoConta;
+    private Agencia agencia;
+    private String tipoDeConta;
 
-    public Conta(String usuarioCpf, double saldo, TipoContaEnum tipoConta) {
-        this.id = UUID.randomUUID().toString();
+    public Conta(String usuarioCpf, double saldo, Agencia agencia, String tipoDeConta) {
+        this.id = agencia.getId() + "-" + String.format("%05d", contador++);
         this.usuarioCpf = usuarioCpf;
         this.saldo = saldo;
-        this.tipoConta = tipoConta;
+        this.agencia = agencia;
+        this.agencia.adicionarConta(this);
+        this.tipoDeConta = tipoDeConta;
     }
 
     public double consultarSaldo() {
