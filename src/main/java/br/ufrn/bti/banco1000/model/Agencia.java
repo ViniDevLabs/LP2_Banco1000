@@ -23,4 +23,13 @@ public class Agencia {
       throw new IllegalArgumentException("Conta já cadastrada na agência");
     }
   }
+
+  public String toCsv() {
+    return String.format("%d,%s", id, nome);
+  }
+
+  public static Agencia fromCsv(String linha) {
+    String[] campos = linha.split(",");
+    return new Agencia(Integer.parseInt(campos[0]), campos[1]);
+  }
 }

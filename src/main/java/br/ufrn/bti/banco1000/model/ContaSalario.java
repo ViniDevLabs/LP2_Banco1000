@@ -22,6 +22,11 @@ public class ContaSalario extends Conta {
   }
 
   @Override
+  public double depositar(double quantia, boolean deveGerarTransacao) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Depósitos só podem ser feitos pelo empregador.");
+  }
+
+  @Override
   public double saque(double quantia) throws IllegalArgumentException {
     if (saquesRealizados >= limiteSaques) {
       throw new IllegalArgumentException("Limite de saques mensais atingido!");
@@ -50,5 +55,11 @@ public class ContaSalario extends Conta {
 
   public int getSaquesRestantes() {
     return limiteSaques - saquesRealizados;
+  }
+
+  @Override
+  public String toCsv() {
+    return String.format("%s,%s,%s,%s,%s,%s", this.getId(), this.getUsuarioCpf(), this.getSaldo(),
+        this.getAgencia().getId(), this.getTipoDeConta(), limiteSaques - saquesRealizados);
   }
 }

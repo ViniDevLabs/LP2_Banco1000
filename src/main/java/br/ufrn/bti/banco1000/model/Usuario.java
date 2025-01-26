@@ -22,4 +22,13 @@ public class Usuario {
             contas.add(contaNova);
         }
     }
+
+    public String toCsv() {
+        return String.format("%s,%s,%s", nome, cpf, senha);
+    }
+
+    public static Usuario fromCsv(String linha) {
+        String[] campos = linha.split(",");
+        return new Usuario(campos[0], campos[1], campos[2]);
+    }
 }

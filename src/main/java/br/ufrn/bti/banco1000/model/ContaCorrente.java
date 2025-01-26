@@ -1,5 +1,7 @@
 package br.ufrn.bti.banco1000.model;
 
+import br.ufrn.bti.banco1000.utils.TransacaoUtil;
+
 public class ContaCorrente extends Conta {
   private double taxaManutencao;
 
@@ -25,7 +27,14 @@ public class ContaCorrente extends Conta {
       throw new IllegalArgumentException("Saldo insuficiente para aplicar a taxa de manutenção!");
     }
 
-    saque(taxaManutencao);
+    saque(taxaManutencao, false);
+    TransacaoUtil.gerarTransacao(this, "Pagamento da taxa de manutenção", taxaManutencao);
     System.out.println("Taxa de manutenção de R$" + taxaManutencao + " aplicada com sucesso.");
+  }
+
+  @Override
+  public String toCsv() {
+    return String.format("%s,%s,%s,%s,%s,%s", this.getId(), this.getUsuarioCpf(), this.getSaldo(),
+        this.getAgencia().getId(), this.getTipoDeConta(), this.getTaxaManutencao());
   }
 }

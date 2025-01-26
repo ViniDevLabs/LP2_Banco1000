@@ -1,6 +1,7 @@
 package br.ufrn.bti.banco1000.menu;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -10,6 +11,7 @@ import br.ufrn.bti.banco1000.model.ContaCorrente;
 import br.ufrn.bti.banco1000.model.ContaPoupanca;
 import br.ufrn.bti.banco1000.model.ContaSalario;
 import br.ufrn.bti.banco1000.model.Usuario;
+import br.ufrn.bti.banco1000.utils.CsvUtil;
 
 public final class Menu {
   private static Scanner scanner = new Scanner(System.in);
@@ -22,32 +24,42 @@ public final class Menu {
   }
 
   public static void iniciarPrograma() {
-    Agencia agencia1 = new Agencia(001, "Agência 1");
-    Agencia agencia2 = new Agencia(002, "Agência 2");
+    carregarUsuarios();
+    carregarAgencias();
+    carregarContas();
 
-    agencias.add(agencia1);
-    agencias.add(agencia2);
+    // Caso seja necessário criar as agências, usuários e contas novamente,
+    // descomente o código abaixo
 
-    Usuario usuario1 = new Usuario("João", "12345678900", "1234");
-    Conta contaCorrente1 = new ContaCorrente(usuario1.getCpf(), 500, agencia1);
-    Conta contaPoupanca1 = new ContaPoupanca(usuario1.getCpf(), 10, agencia1);
-    Conta contaSalario1 = new ContaSalario(usuario1.getCpf(), 1500, agencia1);
+    // Agencia agencia1 = new Agencia(001, "Agência 1");
+    // Agencia agencia2 = new Agencia(002, "Agência 2");
 
-    usuario1.adicionarConta(contaCorrente1);
-    usuario1.adicionarConta(contaPoupanca1);
-    usuario1.adicionarConta(contaSalario1);
+    // agencias.add(agencia1);
+    // agencias.add(agencia2);
+    // reescreverAgencias(agencias);
 
-    Usuario usuario2 = new Usuario("Maria", "98765432100", "1234");
-    Conta contaCorrente2 = new ContaCorrente(usuario2.getCpf(), 500, agencia2);
-    Conta contaPoupanca2 = new ContaPoupanca(usuario2.getCpf(), 10, agencia2);
-    Conta contaSalario2 = new ContaSalario(usuario2.getCpf(), 1500, agencia2);
+    // Usuario usuario1 = new Usuario("João", "12345678900", "1234");
+    // Conta contaCorrente1 = new ContaCorrente(usuario1.getCpf(), 500, agencia1);
+    // Conta contaPoupanca1 = new ContaPoupanca(usuario1.getCpf(), 10, agencia1);
+    // Conta contaSalario1 = new ContaSalario(usuario1.getCpf(), 1500, agencia1);
 
-    usuario2.adicionarConta(contaCorrente2);
-    usuario2.adicionarConta(contaPoupanca2);
-    usuario2.adicionarConta(contaSalario2);
+    // usuario1.adicionarConta(contaCorrente1);
+    // usuario1.adicionarConta(contaPoupanca1);
+    // usuario1.adicionarConta(contaSalario1);
 
-    usuarios.add(usuario1);
-    usuarios.add(usuario2);
+    // Usuario usuario2 = new Usuario("Maria", "98765432100", "1234");
+    // Conta contaCorrente2 = new ContaCorrente(usuario2.getCpf(), 500, agencia2);
+    // Conta contaPoupanca2 = new ContaPoupanca(usuario2.getCpf(), 10, agencia2);
+    // Conta contaSalario2 = new ContaSalario(usuario2.getCpf(), 1500, agencia2);
+
+    // usuario2.adicionarConta(contaCorrente2);
+    // usuario2.adicionarConta(contaPoupanca2);
+    // usuario2.adicionarConta(contaSalario2);
+
+    // usuarios.add(usuario1);
+    // usuarios.add(usuario2);
+    // reescreverUsuarios(usuarios);
+    // reescreverContas(usuarios);
 
     while (true) {
       if (usuarioAtual == null) {
@@ -150,6 +162,7 @@ public final class Menu {
     } else {
       Usuario usuario = new Usuario(nome, valorCpf, senha);
       usuarios.add(usuario);
+      reescreverUsuarios(usuarios);
       System.out.println("Usuário cadastrado com sucesso!\n");
     }
   }
@@ -259,6 +272,7 @@ public final class Menu {
       }
 
       usuarioAtual.adicionarConta(contaNova);
+      reescreverContas(usuarios);
       System.out.println("Conta criada com sucesso!\n");
     } catch (Exception e) {
       System.err.println("Erro em alguma operação. Tente novamente\n");
@@ -376,15 +390,17 @@ public final class Menu {
           break;
         }
         case 5 -> {
-          if (contaAtual instanceof ContaCorrente) {
+          if (contaAtual instanceof ContaCorrente conta) {
             opcaoInvalida = false;
-            ((ContaCorrente) contaAtual).aplicarTaxaManutencao();
-          } else if (contaAtual instanceof ContaPoupanca) {
+            conta.aplicarTaxaManutencao();
+            reescreverContas(usuarios);
+          } else if (contaAtual instanceof ContaPoupanca conta) {
             opcaoInvalida = false;
-            ((ContaPoupanca) contaAtual).aplicarRendimento();
-          } else if (contaAtual instanceof ContaSalario) {
+            conta.aplicarRendimento();
+            reescreverContas(usuarios);
+          } else if (contaAtual instanceof ContaSalario conta) {
             opcaoInvalida = false;
-            int saquesRestantes = ((ContaSalario) contaAtual).getSaquesRestantes();
+            int saquesRestantes = conta.getSaquesRestantes();
             System.out.println("Você possui " + saquesRestantes + " saques restantes.\n");
           }
           break;
@@ -399,6 +415,7 @@ public final class Menu {
       System.out.print("\nDigite o valor do depósito: ");
       double valor = Double.parseDouble(scanner.nextLine());
       contaAtual.depositar(valor);
+      reescreverContas(usuarios);
       System.out.println("Depósito realizado com sucesso!\n");
     } catch (Exception e) {
       System.err.println(e.getMessage());
@@ -411,6 +428,7 @@ public final class Menu {
       System.out.print("\nDigite o valor do saque: ");
       double valor = Double.parseDouble(scanner.nextLine());
       contaAtual.saque(valor);
+      reescreverContas(usuarios);
       System.out.println("Saque realizado com sucesso!\n");
     } catch (Exception e) {
       System.err.println(e.getMessage());
@@ -435,6 +453,7 @@ public final class Menu {
       System.out.print("Digite o valor a ser transferido: ");
       double valor = Double.parseDouble(scanner.nextLine());
       contaAtual.transferencia(contaSelecionada, valor);
+      reescreverContas(usuarios);
 
       System.out.println("Transferência realizada com sucesso para a conta " + contaSelecionada.getId() + "\n");
     } catch (Exception e) {
@@ -442,4 +461,54 @@ public final class Menu {
       System.out.println("Erro na operação, tente novamente.\n");
     }
   }
+
+  private static void carregarUsuarios() {
+    for (String linha : CsvUtil.carregarArquivo("src/main/resources/usuarios.csv")) {
+      usuarios.add(Usuario.fromCsv(linha));
+    }
+  }
+
+  private static void carregarAgencias() {
+    for (String linha : CsvUtil.carregarArquivo("src/main/resources/agencias.csv")) {
+      agencias.add(Agencia.fromCsv(linha));
+    }
+  }
+
+  private static void carregarContas() {
+    for (String linha : CsvUtil.carregarArquivo("src/main/resources/contas.csv")) {
+      Conta conta = Conta.fromCsv(linha, agencias);
+      Optional<Usuario> usuario = usuarios.stream()
+          .filter(u -> u.getCpf().equals(conta.getUsuarioCpf()))
+          .findFirst();
+      usuario.ifPresent(u -> u.adicionarConta(conta));
+    }
+  }
+
+  private static void reescreverUsuarios(List<Usuario> usuarios) {
+    List<String> linhas = usuarios.stream()
+        .map(Usuario::toCsv)
+        .toList();
+
+    CsvUtil.salvarArquivo("src/main/resources/usuarios.csv", linhas);
+  }
+
+  private static void reescreverAgencias(List<Agencia> agencias) {
+    List<String> linhas = agencias.stream()
+        .map(Agencia::toCsv)
+        .toList();
+    CsvUtil.salvarArquivo("src/main/resources/agencias.csv", linhas);
+  }
+
+  private static void reescreverContas(List<Usuario> usuarios) {
+    List<Conta> contas = new ArrayList<>();
+    for (Usuario usuario : usuarios) {
+      contas.addAll(usuario.getContas());
+    }
+
+    List<String> linhas = contas.stream()
+        .map(Conta::toCsv)
+        .toList();
+    CsvUtil.salvarArquivo("src/main/resources/contas.csv", linhas);
+  }
+
 }
