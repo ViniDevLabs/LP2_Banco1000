@@ -18,8 +18,17 @@ public class Usuario {
     }
 
     public void adicionarConta(Conta contaNova) {
-        if (!contas.stream().anyMatch(conta -> conta.getId().equals(contaNova.getId()))) {
+        if (contas.stream().noneMatch(conta -> conta.getId().equals(contaNova.getId()))) {
             contas.add(contaNova);
         }
+    }
+
+    public String toCsv() {
+        return String.format("%s,%s,%s", nome, cpf, senha);
+    }
+
+    public static Usuario fromCsv(String linha) {
+        String[] campos = linha.split(",");
+        return new Usuario(campos[0], campos[1], campos[2]);
     }
 }
