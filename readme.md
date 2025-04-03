@@ -16,6 +16,9 @@ Versão 2.0:
 Ordem dos valores nos arquivos .csv:
 
 Agências: Id, nome  
+
 Contas: Id, CPF do usuário, Saldo, Id da agência, Tipo de conta, Informação associada ao tipo de conta  
+
 Transações: Horário da transação, CPF do usuário, Id da conta, Tipo de conta, Operação realizada, Quantia relacionada  
+
 Usuários: Nome, CPF, Senha
